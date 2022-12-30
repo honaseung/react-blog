@@ -1,5 +1,6 @@
 import Post from '../../models/post';
 import mongoose from 'mongoose';
+import Joi, { array, string } from 'joi';
 
 //DB 에 해싱되어 저장되어 있는 ID 값으로써 유효한지 검증하는 함수
 const { ObjectId } = mongoose.Types;
@@ -16,6 +17,22 @@ export const checkObjectId = (ctx, next) => {
 
 //데이터 추가
 export const write = async (ctx) => {
+  //검증을 위한 객체 생성
+  const schema = Joi.object().keys({
+    //문자열이고 필수값인지
+    title: Joi.string().required(),
+    body: Joi.string().required(),
+    //문자열로 이루어진 배열
+    tags: Joi.array().items(Joi.string()).required(),
+  });
+  //검증
+  const result = schema.validate(ctx.request.body);
+  if (result.error) {
+    ctx.status = 400;
+    ctx.body = result.error;
+    return;
+  }
+
   const { title, body, tags } = ctx.request.body;
   //추가해줄 내용을 객체형 파라미터로 넘겨서 스키마 객체 생성후
   const post = new Post({
@@ -79,6 +96,22 @@ export const remove = async (ctx) => {
 
 //단건 수정
 export const update = async (ctx) => {
+  //검증을 위한 객체 생성
+  const schema = Joi.object().keys({
+    //str 타입을 검증 해줄것이기에 숫자를 넘겨주면 에러가 날 것같지만 자동으로 형변환을 해주어 에러가 발생하지 않는다.
+    title: string(),
+    body: string(),
+    tags: array().items(string()),
+  });
+
+  //검증
+  const result = schema.validate(ctx.request.body);
+  if (result.error) {
+    ctx.status = 400;
+    ctx.body = result.error;
+    return;
+  }
+
   const { id } = ctx.params;
   try {
     //id 값만 url 로 받고 나머진 바디로 받는다.
