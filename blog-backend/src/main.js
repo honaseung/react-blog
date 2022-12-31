@@ -7,6 +7,7 @@ import bodyParser from 'koa-bodyparser';
 import mongoose from 'mongoose';
 // import createFakeData from './createFakeData';
 import authApi from './api/auth';
+import jwtMiddleware from './lib/jwtMiddleware';
 
 const { PORT, MONGO_URI } = process.env;
 
@@ -23,8 +24,10 @@ mongoose
 const app = new Koa();
 const router = new Router();
 
-//라우터 등록 전에해줘야한다.
+//라우터 등록 전에 해줘야한다.
 app.use(bodyParser());
+//라우터 등록 전에 해줘야한다.
+app.use(jwtMiddleware);
 
 // //api 라는 폴더의 index.js 에서 가져온 라우터 등록
 // //해당하는 모든 라우터들은 경로가 반드시 /api 부터 시작해야한다.
