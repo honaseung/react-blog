@@ -5,12 +5,18 @@ import Router from 'koa-router';
 import postApi from './api/posts';
 import bodyParser from 'koa-bodyparser';
 import mongoose from 'mongoose';
+// import createFakeData from './createFakeData';
+import authApi from './api/auth';
 
 const { PORT, MONGO_URI } = process.env;
 
 mongoose
   .connect(MONGO_URI)
-  .then(() => console.log('Connect to MongoDB'))
+  .then(() => {
+    console.log('Connect to MongoDB');
+    //페이지네이션 구현을 위한 더미 데이터 생성용 함수
+    // createFakeData();
+  })
   .catch((e) => console.log('Fail to connect', e));
 
 //서버 생성
@@ -24,6 +30,7 @@ app.use(bodyParser());
 // //해당하는 모든 라우터들은 경로가 반드시 /api 부터 시작해야한다.
 // router.use('/api', api.routes());
 router.use('/posts', postApi.routes());
+router.use('/auth', authApi.routes());
 
 // //라우터 설정
 // //첫번째 파라미터는 경로, 두번째 파라미터는 미들웨어에서 사용할 함수
