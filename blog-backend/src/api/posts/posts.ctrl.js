@@ -5,6 +5,8 @@ import Joi, { array, string } from 'joi';
 //DB 에 해싱되어 저장되어 있는 ID 값으로써 유효한지 검증하는 함수
 const { ObjectId } = mongoose.Types;
 
+const DOCUMENT_PER_PAGE = 10;
+
 export const checkObjectId = (ctx, next) => {
   const { id } = ctx.params;
   if (!ObjectId.isValid(id)) {
@@ -53,10 +55,38 @@ export const write = async (ctx) => {
 
 //전체 조회
 export const list = async (ctx) => {
+  const page = parseInt(ctx.query.page || '1', 10);
+  if (page < 1) {
+    ctx.status = 400;
+    return;
+  }
   try {
     //조회시에는 단순히 함수만 호출하는것이 아니라 함수 호출후에 exec 함수를 한번 더 호출 시켜줘야한다.
-    const post = await Post.find().exec();
-    ctx.body = post;
+    //정렬할 필드명은 DB 에서 리턴되는 다큐먼트의 필드를 참고하기
+    const post = await Post.find()
+      .sort({ _id: -1 })
+      //'DOCUMENT_PER_PAGE' 개씩 가져오기
+      .limit(DOCUMENT_PER_PAGE)
+      //순서대로 들어온 데이터 중 몇개를 무시할지
+      .skip((page - 1) * DOCUMENT_PER_PAGE)
+      //조회 리턴값이 JSON 배열이 된다. 단건이면 그냥 JSON 이던가
+      .lean()
+      .exec();
+    //스키마를 통해 DB 에 저장된 다큐먼트의 총 개수를 가져오기
+    const postCount = await Post.countDocuments().exec();
+    //한 페이지당 보여줄 갯수로 전체를 나누어서 마지막 페이지를 구하기
+    //ctx.set 호출하여 커스텀 HTTP 헤더를 첫번째 매개변수로 키 설정, 두번째 매개변수로 값 설정
+    ctx.set('Last-Page', Math.ceil(postCount / DOCUMENT_PER_PAGE));
+    ctx.body = post
+      //다큐먼트 각각을 JSON 형태로 변경
+      //lean 을 호출하면 필요없어진다.
+      // .map((post) => post.toJSON())
+      .map((post) => ({
+        ...post,
+        body:
+          //200 자가 넘으면 200자를 자르고 그 뒤를 '...' 으로 처리
+          post.body.length < 200 ? post.body : `${post.body.slice(0, 200)}...`,
+      }));
   } catch (error) {
     ctx.throw(500, error);
   }
