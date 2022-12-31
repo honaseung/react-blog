@@ -7,11 +7,35 @@ const { ObjectId } = mongoose.Types;
 
 const DOCUMENT_PER_PAGE = 10;
 
-export const checkObjectId = (ctx, next) => {
+//ID 체크하는 함수에서 Post 를 가져오는 함수로 변경
+//ID 체크도 여전히 하고 있다.
+export const getPostById = async (ctx, next) => {
   const { id } = ctx.params;
   if (!ObjectId.isValid(id)) {
     //ID 값이 유효하지 않다면 ID 값을 잘못 넘겨준 클라이언트 오류로 판단
     ctx.status = 400;
+    return;
+  }
+  try {
+    const post = await Post.findById(id);
+    if (!post) {
+      ctx.status = 404;
+      return;
+    }
+    ctx.state.post = post;
+    return next();
+  } catch (error) {
+    ctx.throw(500, error);
+  }
+};
+
+//읽어온 포스트의 작성자인지 여부 판단
+export const checkOwnPost = (ctx, next) => {
+  //post 정보는 미들웨어에서 user 정보는 로그인시에 생성된다.
+  const { post, user } = ctx.state;
+  //_id 값으로 비교한다. 이때 다큐먼트 쪽의 값은 항상 toString() 을 해줘야한다.
+  if (post.user._id.toString() !== user._id) {
+    ctx.status = 403;
     return;
   }
   return next();
@@ -36,11 +60,15 @@ export const write = async (ctx) => {
   }
 
   const { title, body, tags } = ctx.request.body;
+  //user 정보 가져오기
+  const { user } = ctx.state;
   //추가해줄 내용을 객체형 파라미터로 넘겨서 스키마 객체 생성후
   const post = new Post({
     title,
     body,
     tags,
+    //user 정보 추가하기
+    user,
   });
   //await 구문을 사용시에는 항상 try/catch 를 해준다.
   try {
@@ -60,6 +88,13 @@ export const list = async (ctx) => {
     ctx.status = 400;
     return;
   }
+  const { tag, username } = ctx.query;
+  const query = {
+    //값이 유효한지 확인하고 넣어준다. 그렇지 않으면 조회시 항상 검색 조건을 넣어야만 한다.
+    //키 이름에 '.' 이 들어가면 javascript 에서 user 라는 변수 또는 객체를 찾으려고 하기에 문자열로 넣어준다.
+    ...(username ? { 'user.username': username } : {}),
+    ...(tag ? { tags: tag } : {}),
+  };
   try {
     //조회시에는 단순히 함수만 호출하는것이 아니라 함수 호출후에 exec 함수를 한번 더 호출 시켜줘야한다.
     //정렬할 필드명은 DB 에서 리턴되는 다큐먼트의 필드를 참고하기
@@ -73,7 +108,7 @@ export const list = async (ctx) => {
       .lean()
       .exec();
     //스키마를 통해 DB 에 저장된 다큐먼트의 총 개수를 가져오기
-    const postCount = await Post.countDocuments().exec();
+    const postCount = await Post.countDocuments(query).exec();
     //한 페이지당 보여줄 갯수로 전체를 나누어서 마지막 페이지를 구하기
     //ctx.set 호출하여 커스텀 HTTP 헤더를 첫번째 매개변수로 키 설정, 두번째 매개변수로 값 설정
     ctx.set('Last-Page', Math.ceil(postCount / DOCUMENT_PER_PAGE));
@@ -92,21 +127,26 @@ export const list = async (ctx) => {
   }
 };
 
-//단건 조회
-export const read = async (ctx) => {
-  //여기서 사용하는 id 값은 DB 에 저장되어 있는 일종의 해싱된 값 형태이다.
-  const { id } = ctx.params;
-  try {
-    const post = await Post.findById(id).exec();
-    if (!post) {
-      ctx.status = 404;
-      return;
-    }
-    ctx.body = post;
-  } catch (error) {
-    ctx.throw(500, error);
-  }
+//기존에는 실제 조회를 통해 포스트를 가져 왔지만, 변경된 함수는 미들웨어에서 post 를 미리 가져온다.
+export const read = (ctx) => {
+  ctx.body = ctx.state.post;
 };
+
+//단건 조회
+// export const read = async (ctx) => {
+//   //여기서 사용하는 id 값은 DB 에 저장되어 있는 일종의 해싱된 값 형태이다.
+//   const { id } = ctx.params;
+//   try {
+//     const post = await Post.findById(id).exec();
+//     if (!post) {
+//       ctx.status = 404;
+//       return;
+//     }
+//     ctx.body = post;
+//   } catch (error) {
+//     ctx.throw(500, error);
+//   }
+// };
 
 //단건 삭제
 export const remove = async (ctx) => {
