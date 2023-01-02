@@ -1,0 +1,35 @@
+.auth-form-block {
+  h3 {
+    margin: 0;
+    color: #343a40;
+    margin-bottom: 1rem;
+  }
+}
+
+input {
+  font-size: 1rem;
+  border: none;
+  border-bottom: 1px solid #adb5bd;
+  padding-bottom: 0.5rem;
+  outline: none;
+  width: 100%;
+  &:focus {
+    color: oc-teal-7;
+    border-bottom: 1px solid #495057;
+  }
+  & + & {
+    margin-top: 1rem;
+  }
+}
+
+.footer {
+  margin-top: 2rem;
+  text-align: right;
+  a {
+    color: #868e96;
+    text-decoration: underline;
+    &:hover {
+      color: #212529;
+    }
+  }
+}

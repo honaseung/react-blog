@@ -14,4 +14,20 @@
   &:hover {
     background: #868e96;
   }
+
+  margin-top: 1rem;
+}
+
+.fullWidth {
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  width: 100%;
+  font-size: 1.125rem;
+}
+
+.cyan {
+  background: #3bc9db;
+  &:hover {
+    background: #22b8cf;
+  }
 }

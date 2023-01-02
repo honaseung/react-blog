@@ -1,9 +1,11 @@
 import '../../style/components/common/button.scss';
 
-const Button = () => {
+const Button = ({ children, fullWidth, cyan }) => {
+  let style = 'btn-cmm';
+  style = `${style} ${fullWidth ? 'fullWidth' : ''} ${cyan ? 'cyan' : ''}`;
   return (
     <div>
-      <button className="btn-cmm">버튼</button>
+      <button className={style}>{children}</button>
     </div>
   );
 };
