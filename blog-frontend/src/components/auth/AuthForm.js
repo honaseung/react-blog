@@ -7,7 +7,7 @@ const textMap = {
   register: '회원가입',
 };
 
-const AuthForm = ({ type, form, onChange, onSubmit }) => {
+const AuthForm = ({ type, form, onChange, onSubmit, error }) => {
   const text = textMap[type];
   return (
     <div className="auth-form-block">
@@ -41,15 +41,16 @@ const AuthForm = ({ type, form, onChange, onSubmit }) => {
             value={form.passwordConfirm}
           />
         )}
+        {error && <div className="error-msg">{error}</div>}
         <Button fullWidth={true} cyan={true}>
-          로그인
+          {text}
         </Button>
       </form>
       <div className="footer">
         {type === 'register' ? (
-          <Link to={`/${textMap.login}`}>{textMap.login}</Link>
+          <Link to={`/login`}>{textMap.login}</Link>
         ) : (
-          <Link to={`/${textMap.register}`}>{textMap.register}</Link>
+          <Link to={`/register`}>{textMap.register}</Link>
         )}
       </div>
     </div>

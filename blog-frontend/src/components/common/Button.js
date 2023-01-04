@@ -5,7 +5,9 @@ const Button = ({ children, fullWidth, cyan }) => {
   style = `${style} ${fullWidth ? 'fullWidth' : ''} ${cyan ? 'cyan' : ''}`;
   return (
     <div>
-      <button className={style}>{children}</button>
+      <button className={style} type="submit">
+        {children}
+      </button>
     </div>
   );
 };
