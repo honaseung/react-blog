@@ -66,13 +66,14 @@ const RegisterForm = () => {
     if (auth) {
       dispatch(check());
     }
-  }, [auth, authError]);
+  }, [auth, authError, dispatch]);
 
   useEffect(() => {
     if (user) {
       navigate('/');
+      localStorage.setItem('user', JSON.stringify(user));
     }
-  }, [user]);
+  }, [navigate, user]);
 
   return (
     <AuthForm
