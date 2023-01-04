@@ -3,11 +3,11 @@ import '../../style/components/common/button.scss';
 
 const Button = ({ to, history, ...rest }) => {
   let style = 'btn-cmm';
-  style = `${style} ${rest.fullWidth ? 'fullWidth' : ''} ${
-    rest.cyan ? 'cyan' : ''
+  style = `${style}${rest.fullWidth ? ' fullWidth' : ''}${
+    rest.cyan ? ' cyan' : ''
   }`;
   return (
-    <div>
+    <>
       {to ? (
         <Link className={style} to={to}>
           {rest.children}
@@ -17,7 +17,7 @@ const Button = ({ to, history, ...rest }) => {
           {rest.children}
         </button>
       )}
-    </div>
+    </>
   );
 };
 
