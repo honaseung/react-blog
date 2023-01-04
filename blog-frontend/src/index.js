@@ -10,6 +10,18 @@ import rootReducer from './modules';
 import { composeWithDevTools } from '../node_modules/redux-devtools-extension/index';
 import createSagaMiddleware from 'redux-saga';
 import { rootSaga } from './modules/index';
+import { check, tempSetUser } from './modules/user';
+
+function loadUser() {
+  try {
+    const user = localStorage.getItem('user');
+    if (!user) return;
+    store.dispatch(tempSetUser(JSON.stringify(user)));
+    store.dispatch(check());
+  } catch (error) {
+    console.log(error);
+  }
+}
 
 const sagaMiddleware = createSagaMiddleware();
 const store = createStore(
@@ -18,6 +30,7 @@ const store = createStore(
 );
 
 sagaMiddleware.run(rootSaga);
+loadUser();
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(

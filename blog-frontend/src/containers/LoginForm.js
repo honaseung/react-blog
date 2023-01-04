@@ -55,6 +55,7 @@ const LoginForm = () => {
   useEffect(() => {
     if (user) {
       navigate('/');
+      localStorage.setItem('user', user);
     }
   }, [navigate, user]);
 
