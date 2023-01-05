@@ -2,7 +2,7 @@ import { createAction, handleActions } from 'redux-actions';
 import createRequestSaga, {
   createRequestActionTypes,
 } from '../lib/createRequestSaga';
-import * as postsAPI from '../lib/api/posts';
+import * as postAPI from '../lib/api/post';
 import { takeLatest } from 'redux-saga/effects';
 
 const INITIALIZE = 'write/INITIALIZE';
@@ -21,7 +21,7 @@ export const writePost = createAction(WRITE_POST, ({ title, body, tags }) => ({
   tags,
 }));
 
-const writePostSaga = createRequestSaga(WRITE_POST, postsAPI.writePost);
+const writePostSaga = createRequestSaga(WRITE_POST, postAPI.writePost);
 export function* writeSaga() {
   yield takeLatest(WRITE_POST, writePostSaga);
 }

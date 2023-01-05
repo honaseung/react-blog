@@ -1,10 +1,11 @@
 import HeaderContainer from '../containers/common/HeaderContainer';
+import PostListContainer from '../containers/post/PostListContainer';
 
 const PostListPage = () => {
   return (
     <>
       <HeaderContainer />
-      <div>ㅇ</div>
+      <PostListContainer />
     </>
   );
 };

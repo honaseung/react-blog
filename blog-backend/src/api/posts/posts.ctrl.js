@@ -1,11 +1,19 @@
 import Post from '../../models/post';
 import mongoose from 'mongoose';
 import Joi, { array, string } from 'joi';
+import sanitizeHtml from 'sanitize-html';
 
 //DB 에 해싱되어 저장되어 있는 ID 값으로써 유효한지 검증하는 함수
 const { ObjectId } = mongoose.Types;
 
 const DOCUMENT_PER_PAGE = 10;
+
+const removeHtmlAndShorten = (body) => {
+  const filtered = sanitizeHtml(body, {
+    allowedTags: [],
+  });
+  return filtered.length < 200 ? filtered : `${filtered.slice(0, 200)}...`;
+};
 
 //ID 체크하는 함수에서 Post 를 가져오는 함수로 변경
 //ID 체크도 여전히 하고 있다.
@@ -119,8 +127,8 @@ export const list = async (ctx) => {
       .map((post) => ({
         ...post,
         body:
-          //200 자가 넘으면 200자를 자르고 그 뒤를 '...' 으로 처리
-          post.body.length < 200 ? post.body : `${post.body.slice(0, 200)}...`,
+          //HTML 제거하고 200 자가 넘으면 200자를 자르고 그 뒤를 '...' 으로 처리
+          removeHtmlAndShorten(post.body),
       }));
   } catch (error) {
     ctx.throw(500, error);
