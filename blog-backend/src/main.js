@@ -8,6 +8,9 @@ import mongoose from 'mongoose';
 // import createFakeData from './createFakeData';
 import authApi from './api/auth';
 import jwtMiddleware from './lib/jwtMiddleware';
+import serve from 'koa-static';
+import path from 'path';
+import send from 'koa-send';
 
 const { PORT, MONGO_URI } = process.env;
 
@@ -32,8 +35,8 @@ app.use(jwtMiddleware);
 // //api 라는 폴더의 index.js 에서 가져온 라우터 등록
 // //해당하는 모든 라우터들은 경로가 반드시 /api 부터 시작해야한다.
 // router.use('/api', api.routes());
-router.use('/post', postApi.routes());
-router.use('/auth', authApi.routes());
+router.use('/api/post', postApi.routes());
+router.use('/api/auth', authApi.routes());
 
 // //라우터 설정
 // //첫번째 파라미터는 경로, 두번째 파라미터는 미들웨어에서 사용할 함수
@@ -64,6 +67,13 @@ router.use('/auth', authApi.routes());
 
 //서버 (next 가 없으니까)
 app.use(router.routes()).use(router.allowedMethods());
+const builDirectory = path.resolve(__dirname, '../../blog-frontend/build');
+app.use(serve(builDirectory));
+app.use(async (ctx) => {
+  if (ctx.status === 404 && ctx.path.indexOf('/api') !== 0) {
+    await send(ctx, 'index.html', { root: builDirectory });
+  }
+});
 
 //서버 포트 4000 번으로 띄우기
 //PORT 로 지정해주는데 PORT 값이 유효하지 않으면 4000 으로 지정
