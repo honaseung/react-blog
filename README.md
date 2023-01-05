@@ -7,7 +7,8 @@
   <li>React Router</li>
   <li>mongo DB</li>
   <li>koa framework</li>
-  <li>redux, redux-saga</li>
+  <li>redux</li>
+  <li>redux middleware(redux-saga)</li>
   <li>class componenet</li>
   <li>로그인 여부에 따른 글작성</li>
   <li>작성자 여부에 따른 글수정 및 삭제</li>
