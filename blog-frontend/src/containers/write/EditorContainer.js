@@ -4,7 +4,10 @@ import Editor from '../../components/write/Editor';
 import { changeField, initialize } from '../../modules/write';
 
 const EditorContainer = () => {
-  const { title, body } = useSelector(({ title, body }) => ({ title, body }));
+  const { title, body } = useSelector(({ write }) => ({
+    title: write.title,
+    body: write.body,
+  }));
   const dispatch = useDispatch();
 
   const onChangeField = useCallback(

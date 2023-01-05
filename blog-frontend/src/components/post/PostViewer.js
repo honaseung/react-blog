@@ -2,7 +2,7 @@ import '../../style/components/post/post-viewer.scss';
 import SubInfo from '../common/SubInfo';
 import Tags from '../common/Tags';
 
-const PostViewer = ({ post, loading, error }) => {
+const PostViewer = ({ post, loading, error, actionButtons }) => {
   if (error) {
     if (error.response && error.response.status === 404) {
       return (
@@ -29,6 +29,7 @@ const PostViewer = ({ post, loading, error }) => {
         />
         <Tags tags={tags} />
       </div>
+      {actionButtons}
       <div
         className="post-content"
         dangerouslySetInnerHTML={{ __html: body }}

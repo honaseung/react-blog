@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 
 const AuthTemplate = ({ children }) => {
   return (
-    <div className="auth-template-blcok">
+    <div className="auth-template-block">
       <div className="white-box">
         <div className="logo-area">
           <Link to="/">REACTERS</Link>
