@@ -1,0 +1,12 @@
+.sub-info {
+  color: #868e96;
+  span + span:before {
+    color: #ced4da;
+    padding-left: 0.25rem;
+    padding-right: 0.25rem;
+    content: '\B7';
+  }
+  .mt-1r {
+    margin-top: 1rem;
+  }
+}

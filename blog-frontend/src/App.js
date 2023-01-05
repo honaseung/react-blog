@@ -1,3 +1,4 @@
+import { Helmet } from 'react-helmet-async';
 import { Route, Routes } from '../node_modules/react-router-dom/dist/index';
 import LoginPage from './pages/LoginPage';
 import PostListPage from './pages/PostListPage';
@@ -8,12 +9,15 @@ import WritePage from './pages/WritePage';
 function App() {
   return (
     <div>
+      <Helmet>
+        <title>REACTERS</title>
+      </Helmet>
       <Routes>
         <Route index element={<PostListPage />} />
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/write" element={<WritePage />} />
-        <Route path="/@:username">
+        <Route path="/:username">
           <Route index element={<PostListPage />} />
           <Route path=":postId" element={<PostPage />} />
         </Route>

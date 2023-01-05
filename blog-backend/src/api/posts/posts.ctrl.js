@@ -1,11 +1,43 @@
 import Post from '../../models/post';
 import mongoose from 'mongoose';
 import Joi, { array, string } from 'joi';
+import sanitizeHtml from 'sanitize-html';
 
 //DB 에 해싱되어 저장되어 있는 ID 값으로써 유효한지 검증하는 함수
 const { ObjectId } = mongoose.Types;
 
 const DOCUMENT_PER_PAGE = 10;
+
+const sanitizeOption = {
+  allowedTags: [
+    'h1',
+    'h2,',
+    'b',
+    'i',
+    'u',
+    's',
+    'p',
+    'ul',
+    'ol',
+    'li',
+    'blockquote',
+    'a',
+    'img',
+  ],
+  allowedAttributes: {
+    a: ['href', 'name', 'target'],
+    img: ['src'],
+    li: ['class'],
+  },
+  allowedSchemes: ['data', 'http'],
+};
+
+const removeHtmlAndShorten = (body) => {
+  const filtered = sanitizeHtml(body, {
+    allowedTags: [],
+  });
+  return filtered.length < 200 ? filtered : `${filtered.slice(0, 200)}...`;
+};
 
 //ID 체크하는 함수에서 Post 를 가져오는 함수로 변경
 //ID 체크도 여전히 하고 있다.
@@ -65,7 +97,7 @@ export const write = async (ctx) => {
   //추가해줄 내용을 객체형 파라미터로 넘겨서 스키마 객체 생성후
   const post = new Post({
     title,
-    body,
+    body: sanitizeHtml(body, sanitizeOption),
     tags,
     //user 정보 추가하기
     user,
@@ -119,8 +151,8 @@ export const list = async (ctx) => {
       .map((post) => ({
         ...post,
         body:
-          //200 자가 넘으면 200자를 자르고 그 뒤를 '...' 으로 처리
-          post.body.length < 200 ? post.body : `${post.body.slice(0, 200)}...`,
+          //HTML 제거하고 200 자가 넘으면 200자를 자르고 그 뒤를 '...' 으로 처리
+          removeHtmlAndShorten(post.body),
       }));
   } catch (error) {
     ctx.throw(500, error);
@@ -164,28 +196,47 @@ export const remove = async (ctx) => {
 
 // export const replace = (ctx) => {};
 
+function validate(body) {
+  if (
+    typeof body.title === 'string' &&
+    typeof body.body === 'string' &&
+    body.tags instanceof Array
+  )
+    return true;
+  return false;
+}
+
 //단건 수정
 export const update = async (ctx) => {
   //검증을 위한 객체 생성
-  const schema = Joi.object().keys({
-    //str 타입을 검증 해줄것이기에 숫자를 넘겨주면 에러가 날 것같지만 자동으로 형변환을 해주어 에러가 발생하지 않는다.
-    title: string(),
-    body: string(),
-    tags: array().items(string()),
-  });
-
+  //Joi 라이브러리에 버그가 있어서 막음
+  // const schema = Joi.object().keys({
+  //   //str 타입을 검증 해줄것이기에 숫자를 넘겨주면 에러가 날 것같지만 자동으로 형변환을 해주어 에러가 발생하지 않는다.
+  //   title: string(),
+  //   body: string(),
+  //   tags: array().items(string()),
+  // });
   //검증
-  const result = schema.validate(ctx.request.body);
-  if (result.error) {
+  const result = validate(ctx.request.body);
+  // if (result.error) {
+  //   ctx.status = 400;
+  //   ctx.body = result.error;
+  //   return;
+  // }
+  if (!result) {
     ctx.status = 400;
-    ctx.body = result.error;
+    ctx.body = '데이터 타입 오류입니다.';
     return;
   }
 
   const { id } = ctx.params;
+  const nextData = { ...ctx.request.body };
+  if (nextData.body) {
+    nextData.body = sanitizeHtml(nextData.body, sanitizeOption);
+  }
   try {
     //id 값만 url 로 받고 나머진 바디로 받는다.
-    const post = await Post.findByIdAndUpdate(id, ctx.request.body, {
+    const post = await Post.findByIdAndUpdate(id, nextData, {
       //수정된 데이터를 리턴할지 여부, false 일시 수정 이전 데이터가 리턴된다.
       new: true,
     }).exec();

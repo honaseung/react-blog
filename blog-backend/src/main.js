@@ -32,7 +32,7 @@ app.use(jwtMiddleware);
 // //api 라는 폴더의 index.js 에서 가져온 라우터 등록
 // //해당하는 모든 라우터들은 경로가 반드시 /api 부터 시작해야한다.
 // router.use('/api', api.routes());
-router.use('/posts', postApi.routes());
+router.use('/post', postApi.routes());
 router.use('/auth', authApi.routes());
 
 // //라우터 설정
